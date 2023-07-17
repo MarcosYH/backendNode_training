@@ -1,44 +1,20 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-const Thing = require("../models/thing");
+const multer = require("../middlewares/multer-config")
 
-router.post("/", (req, res, next) => {
-    delete req.body._id;
-    const thing = new Thing({
-      ...req.body,
-    });
-    thing
-      .save()
-      .then((result) =>
-        res.status(201).json({ message: "Objet enregistré !", result })
-      )
-      .catch((error) => res.status(400).json({ error }));
-  }); 
-  
-  router.get("/:id", (req, res, next) => {
-    Thing.findOne({ _id: req.params.id })
-      .then((thing) => res.status(200).json(thing))
-      .catch((error) => res.status(404).json({ error }));
-  });
-  
-  router.put("/:id", (req, res, next) => {
-    Thing.updateOne({ _id: req.params.id }, { ...req.body, _id: req.params.id })
-      .then(() => res.status(200).json({ message: "Objet modifié !" }))
-      .catch((error) => res.status(400).json({ error }));
-  });
-  
-  router.delete("/:id", (req, res, next) => {
-    Thing.deleteOne({ _id: req.params.id })
-      .then(() => res.status(200).json({ message: "objet supprimé" }))
-      .catch((error) => res.status(400).json({ error }));
-  });
-  
-  router.get("/", (req, res, next) => {
-    Thing.find()
-      .then((things) => res.status(200).json(things))
-      .catch((error) => res.status(400).json({ error }));
-  });
-  
+const auth = require('../middlewares/auth');
 
-  module.exports = router;
+const stuffControlers = require("../controllers/stuff");
+
+router.post("/", auth, multer, stuffControlers.createThing);
+
+router.get("/:id", auth, stuffControlers.getOneThing);
+
+router.put("/:id", auth, multer, stuffControlers.putOneThing);
+
+router.delete("/:id", auth, stuffControlers.deleteOneThing);
+
+router.get("/", auth, stuffControlers.getAllThing);
+
+module.exports = router;
